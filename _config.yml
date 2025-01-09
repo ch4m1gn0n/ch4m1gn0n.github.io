@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: Ch4m1gn0n's blog
 subtitle: ''
 description: ''
 keywords:
@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://ch4m1gn0n.github.io/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -103,4 +103,4 @@ theme: cactus
 deploy:
   type: git
   repo: git@github.com:ch4m1gn0n/ch4m1gn0n.github.io.git
-  branch: github-page
+  branch: gh-pages
