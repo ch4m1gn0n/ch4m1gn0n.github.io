@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="加密分析拖入binary ninja内容 12345678910111213141516171819202122232425262728293031323334353600001295      void* fsbase00001295      int64_t rax &#x3D; *(fsbase + 0x28)			 &#x2F;&#x2F; 加载文件000012b2      FILE* fp &#x3D; fopen(file">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Reverse Engineering 路线笔记（一）：Simple Encryptor">
+<meta property="og:url" content="https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/index.html">
+<meta property="og:site_name" content="Ch4m1gn0n&#39;s blog">
+<meta property="og:description" content="加密分析拖入binary ninja内容 12345678910111213141516171819202122232425262728293031323334353600001295      void* fsbase00001295      int64_t rax &#x3D; *(fsbase + 0x28)			 &#x2F;&#x2F; 加载文件000012b2      FILE* fp &#x3D; fopen(file">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9cf0c5ff4b6448ec9ba9745402c209aa.png">
+<meta property="article:published_time" content="2025-07-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-07-01T09:51:06.798Z">
+<meta property="article:author" content="Ch4m1gn0n">
+<meta property="article:tag" content="HACKTHEBOX">
+<meta property="article:tag" content="Reverse_Engineering">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9cf0c5ff4b6448ec9ba9745402c209aa.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Reverse Engineering 路线笔记（一）：Simple Encryptor</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/07/01/hello-world/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&text=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&is_video=false&description=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&name=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&t=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">加密分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%AF%86"><span class="toc-number">2.</span> <span class="toc-text">解密</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        HTB Reverse Engineering 路线笔记（一）：Simple Encryptor
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Ch4m1gn0n</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-07-01T00:00:00.000Z" class="dt-published" itemprop="datePublished">2025-07-01</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/Reverse-Engineering/">Reverse_Engineering</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/HACKTHEBOX/" rel="tag">HACKTHEBOX</a>, <a class="p-category" href="/tags/Reverse-Engineering/" rel="tag">Reverse_Engineering</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="加密分析"><a href="#加密分析" class="headerlink" title="加密分析"></a>加密分析</h3><p>拖入binary ninja<br><img src="https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9cf0c5ff4b6448ec9ba9745402c209aa.png"><br>内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">00001295</span>      <span class="type">void</span>* fsbase</span><br><span class="line"><span class="number">00001295</span>      <span class="type">int64_t</span> rax = *(fsbase + <span class="number">0x28</span>)</span><br><span class="line">			 <span class="comment">// 加载文件</span></span><br><span class="line"><span class="number">000012b</span>2      FILE* fp = fopen(filename: <span class="string">&quot;flag&quot;</span>, mode: &amp;data_2004)</span><br><span class="line">			 <span class="comment">// 获取文件长度</span></span><br><span class="line"><span class="number">000012</span>cc      fseek(fp, offset: <span class="number">0</span>, whence: <span class="number">2</span>)</span><br><span class="line"><span class="number">000012</span>d8      <span class="type">int64_t</span> rax_4 = ftell(fp)</span><br><span class="line"><span class="number">000012f</span>2      fseek(fp, offset: <span class="number">0</span>, whence: <span class="number">0</span>)</span><br><span class="line">			 <span class="comment">// 申请内存</span></span><br><span class="line"><span class="number">000012f</span>e      <span class="type">void</span>* buf = <span class="built_in">malloc</span>(bytes: rax_4)</span><br><span class="line">			 <span class="comment">// 将flag 写人内存</span></span><br><span class="line"><span class="number">0000131</span>e      fread(buf, size: rax_4, count: <span class="number">1</span>, fp)</span><br><span class="line"><span class="number">0000132</span>a      fclose(fp)</span><br><span class="line">			 <span class="comment">// 获取当前时间戳并设置伪随机数种子</span></span><br><span class="line"><span class="number">00001339</span>      <span class="type">uint32_t</span> var_40 = time(nullptr)</span><br><span class="line"><span class="number">00001341</span>      srand(x: var_40)</span><br><span class="line"><span class="number">00001341</span>      </span><br><span class="line"><span class="number">000013</span>c8      <span class="keyword">for</span> (<span class="type">int64_t</span> i = <span class="number">0</span>; i s&lt; rax_4; i += <span class="number">1</span>)</span><br><span class="line">			 <span class="comment">// 将每位与第一个随机数异或后，循环左移 第二个随机数与7 的位数</span></span><br><span class="line"><span class="number">00001350</span>          <span class="type">char</span> rax_11 = rand()</span><br><span class="line"><span class="number">0000137b</span>          *(buf + i) ^= rax_11</span><br><span class="line"><span class="number">00001382</span>          <span class="type">char</span> rax_19 = rand() &amp; <span class="number">7</span></span><br><span class="line"><span class="number">000013b</span>9          *(buf + i) = rol.b(*(buf + i), rax_19)</span><br><span class="line"><span class="number">000013b</span>9      </span><br><span class="line">			 <span class="comment">// 将时间戳与加密后的内容写入文件</span></span><br><span class="line"><span class="number">000013</span>d8      FILE* fp_1 = fopen(filename: <span class="string">&quot;flag.enc&quot;</span>, mode: &amp;data_200c)</span><br><span class="line"><span class="number">000013f</span>9      fwrite(buf: &amp;var_40, size: <span class="number">1</span>, count: <span class="number">4</span>, fp: fp_1)</span><br><span class="line"><span class="number">00001412</span>      fwrite(buf, size: <span class="number">1</span>, count: rax_4, fp: fp_1)</span><br><span class="line"><span class="number">0000141</span>e      fclose(fp: fp_1)</span><br><span class="line"><span class="number">0000141</span>e      </span><br><span class="line"><span class="number">00001435</span>      <span class="keyword">if</span> (rax == *(fsbase + <span class="number">0x28</span>))</span><br><span class="line"><span class="number">0000143</span>d          <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"><span class="number">0000143</span>d      </span><br><span class="line"><span class="number">00001437</span>      __stack_chk_fail()</span><br><span class="line"><span class="number">00001437</span>      <span class="keyword">noreturn</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>rol.b 按位循环左移 ，.b 表示操作一个字节</p>
+</blockquote>
+<h3 id="解密"><a href="#解密" class="headerlink" title="解密"></a>解密</h3><p>解密思路<br>获取时间戳设置种子 -&gt; 循环每位（生成随机数a、b&#x3D;b&amp;7 -&gt; 循环右移 b 位 -&gt; 异或a）-&gt; flag<br><strong>代码：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::fs::File;</span><br><span class="line"><span class="keyword">use</span> std::io::Read;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 声明 C 函数</span></span><br><span class="line"><span class="keyword">unsafe</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">srand</span>(seed: <span class="type">u32</span>);</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">rand</span>() <span class="punctuation">-&gt;</span> <span class="type">i32</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解密函数</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">decrypt_byte</span>(x:&amp;<span class="type">u8</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123;</span><br><span class="line">    <span class="keyword">unsafe</span>&#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">rd1</span> = <span class="title function_ invoke__">rand</span>() <span class="keyword">as</span> <span class="type">u8</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">rd2</span> = (<span class="title function_ invoke__">rand</span>() &amp; <span class="number">7</span>) <span class="keyword">as</span> <span class="type">u32</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">rotate</span> = x.<span class="title function_ invoke__">rotate_right</span>(rd2);</span><br><span class="line">        rotate ^ rd1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开文件</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">file</span> = File::<span class="title function_ invoke__">open</span>(<span class="string">&quot;/root/htb/Reverse Engeneering/rev_simpleencryptor/flag.enc&quot;</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="comment">// 获取文件大小</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">file_size</span> = file.<span class="title function_ invoke__">metadata</span>().<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">len</span>() <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="comment">// println!(&quot;&#123;&#125;&quot;,file_size);</span></span><br><span class="line">    <span class="comment">// 申请内存</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">buffer</span> = <span class="built_in">vec!</span>[<span class="number">0u8</span>;file_size];</span><br><span class="line">    <span class="comment">// 读取文件内容写入内存</span></span><br><span class="line">    file.<span class="title function_ invoke__">read_exact</span>(&amp;<span class="keyword">mut</span> buffer).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="comment">// 获取 时间戳</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">timestamp</span> = <span class="type">u32</span>::<span class="title function_ invoke__">from_le_bytes</span>(buffer[<span class="number">0</span>..<span class="number">4</span>].<span class="title function_ invoke__">try_into</span>().<span class="title function_ invoke__">unwrap</span>());</span><br><span class="line">    <span class="comment">// 剩余加密数据</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">encrypted_data</span> = &amp;buffer[<span class="number">4</span>..];</span><br><span class="line">    <span class="comment">// println!(&quot;&#123;&#125;&quot;,encrypted_data.len());</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;The encryption timestamp is: &#123;&#125;&quot;</span>, timestamp);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">unsafe</span>&#123;</span><br><span class="line">        <span class="comment">// 设置随机数种子</span></span><br><span class="line">        <span class="title function_ invoke__">srand</span>(timestamp);</span><br><span class="line">        <span class="comment">// 遍历并生成新数组</span></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">decrypt_data</span>: <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; = encrypted_data.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">map</span>(decrypt_byte).<span class="title function_ invoke__">collect</span>();</span><br><span class="line">        <span class="comment">// 转成字符串</span></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">s</span> = <span class="type">String</span>::<span class="title function_ invoke__">from_utf8</span>(decrypt_data).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;The flag is: &#123;&#125;&quot;</span>, s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">加密分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%AF%86"><span class="toc-number">2.</span> <span class="toc-text">解密</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&text=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&is_video=false&description=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&title=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&name=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/01/Simple%20Encryptor/&t=HTB Reverse Engineering 路线笔记（一）：Simple Encryptor"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2025
+    Ch4m1gn0n
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
