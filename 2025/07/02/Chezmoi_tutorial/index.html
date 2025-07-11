@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="之前一直使用 github 裸仓库 管理 dotfile 的同步，最近在处理服务器同步冲突时，不小心 clean -fd 把 home 目录清了干净。痛定思痛，来尝试下用 Chezmoi 管理。参考文章 0x00 安装1. mac1234brew install chezmoi# 验证安装成功 chezmoi --version  2. Debian 服务器直接下载 二进制文件 1sh -c &amp;q">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Chezmoi 实践：跨平台 dotfile 管理">
+<meta property="og:url" content="https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/index.html">
+<meta property="og:site_name" content="Ch4m1gn0n&#39;s blog">
+<meta property="og:description" content="之前一直使用 github 裸仓库 管理 dotfile 的同步，最近在处理服务器同步冲突时，不小心 clean -fd 把 home 目录清了干净。痛定思痛，来尝试下用 Chezmoi 管理。参考文章 0x00 安装1. mac1234brew install chezmoi# 验证安装成功 chezmoi --version  2. Debian 服务器直接下载 二进制文件 1sh -c &amp;q">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/9288ad29ee15437326e6bef380fdc4e2.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/d3137c4c447193b88036663573399b49.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/0a49e445f5c9c1cfb8ff67704b0f991c.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/57af769d292f109576c7588c09c44447.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/6705533d680617a891bcbb0fbbeaada0.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/d1e6fb8f31e07d2f02e24a14b9bd2d5f.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/451c098f176241cef759a70f6e5277bf.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/8e4783661ab17aaa1198d2cd60bd3353.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/6be507e18d0ed5d5cb5a1f1cb38a54b1.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/790ac2a04548029d4d2721a626af8059.png">
+<meta property="article:published_time" content="2025-07-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-07-11T03:03:28.134Z">
+<meta property="article:author" content="Ch4m1gn0n">
+<meta property="article:tag" content="config">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ch4m1gn0n.github.io/Chezmoi_tutorial.assets/9288ad29ee15437326e6bef380fdc4e2.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Chezmoi 实践：跨平台 dotfile 管理</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/07/02/github_dotfile_management/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&text=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&is_video=false&description=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Chezmoi 实践：跨平台 dotfile 管理&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&name=Chezmoi 实践：跨平台 dotfile 管理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&t=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">0x00 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-mac"><span class="toc-number">1.1.</span> <span class="toc-text">1. mac</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Debian-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.2.</span> <span class="toc-text">2. Debian 服务器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">0x01 初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E7%AE%A1%E7%90%86dotfiles"><span class="toc-number">3.</span> <span class="toc-text">0x02 管理dotfiles</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E5%90%8C%E6%AD%A5%E5%88%B0-git"><span class="toc-number">4.</span> <span class="toc-text">0x03 同步到 git</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E8%87%AA%E5%8A%A8-push-%E6%9B%B4%E6%96%B0"><span class="toc-number">5.</span> <span class="toc-text">0x04 自动 push 更新</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%EF%BC%88%E7%B1%BB%E4%BC%BC-git%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">0x05 基本使用（类似 git）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BF%AE%E6%94%B9%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%90%8E%E6%B7%BB%E5%8A%A0%E5%88%B0-chezmoi-%E5%AD%98%E5%82%A8%E5%BA%93"><span class="toc-number">6.0.1.</span> <span class="toc-text">1. 修改本地文件后添加到 chezmoi 存储库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BF%AE%E6%94%B9%E5%AD%98%E5%82%A8%E5%BA%93%E6%96%87%E4%BB%B6%E5%BA%94%E7%94%A8%E5%88%B0%E6%9C%AC%E5%9C%B0"><span class="toc-number">6.0.2.</span> <span class="toc-text">2. 修改存储库文件应用到本地</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E5%A4%9A%E7%AB%AF%E5%90%8C%E6%AD%A5"><span class="toc-number">7.</span> <span class="toc-text">0x06 多端同步</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Chezmoi 实践：跨平台 dotfile 管理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Ch4m1gn0n</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-07-02T00:00:00.000Z" class="dt-published" itemprop="datePublished">2025-07-02</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/config/">config</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/config/" rel="tag">config</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>之前一直使用 github 裸仓库 管理 dotfile 的同步，最近在处理服务器同步冲突时，不小心 <code>clean -fd</code> 把 <code>home</code> 目录清了干净。痛定思痛，来尝试下用 Chezmoi 管理。<br><a target="_blank" rel="noopener" href="https://ivonblog.com/posts/chezmoi-manage-dotfiles/">参考文章</a></p>
+<h2 id="0x00-安装"><a href="#0x00-安装" class="headerlink" title="0x00 安装"></a>0x00 安装</h2><h3 id="1-mac"><a href="#1-mac" class="headerlink" title="1. mac"></a>1. mac</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">brew install chezmoi</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装成功 </span></span><br><span class="line">chezmoi --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Debian-服务器"><a href="#2-Debian-服务器" class="headerlink" title="2. Debian 服务器"></a>2. Debian 服务器</h3><p>直接下载 二进制文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh -c <span class="string">&quot;<span class="subst">$(curl -fsLS get.chezmoi.io)</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/Chezmoi_tutorial.assets/9288ad29ee15437326e6bef380fdc4e2.png" alt="CleanShot 2025-07-04 at 17.13.55@2x.png"></p>
+<h2 id="0x01-初始化"><a href="#0x01-初始化" class="headerlink" title="0x01 初始化"></a>0x01 初始化</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chezmoi init</span><br></pre></td></tr></table></figure>
+<p>会创建这个文件夹<code>.local/share/chezmoi/</code><br><img src="/Chezmoi_tutorial.assets/d3137c4c447193b88036663573399b49.png" alt="CleanShot 2025-07-04 at 17.22.05@2x.png"></p>
+<h2 id="0x02-管理dotfiles"><a href="#0x02-管理dotfiles" class="headerlink" title="0x02 管理dotfiles"></a>0x02 管理dotfiles</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 dotfiles</span></span><br><span class="line">chezmoi add ~/.hyper.js</span><br><span class="line"><span class="comment">#...</span></span><br></pre></td></tr></table></figure>
+<p>添加之后会将文件备份到 <code>.local/share/chezmoi/</code><br><img src="/Chezmoi_tutorial.assets/0a49e445f5c9c1cfb8ff67704b0f991c.png" alt="CleanShot 2025-07-07 at 17.46.19@2x.png"><br><code>chezmoi managed</code> 可以列出所有添加的文件<br><img src="/Chezmoi_tutorial.assets/57af769d292f109576c7588c09c44447.png" alt="CleanShot 2025-07-07 at 17.47.41@2x.png"></p>
+<h2 id="0x03-同步到-git"><a href="#0x03-同步到-git" class="headerlink" title="0x03 同步到 git"></a>0x03 同步到 git</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 进入存储目录</span><br><span class="line">cd .local/share/chezmoi/</span><br><span class="line"># 或者 </span><br><span class="line">chezmoi cd</span><br><span class="line"></span><br><span class="line"># 同步(提前把库创建好)</span><br><span class="line">git remote add origin https://github.com/&#123;用户名&#125;/dotfiles.git</span><br><span class="line">git branch -M main</span><br><span class="line">git add ./</span><br><span class="line">git commit -m &#x27;sync&#x27;</span><br><span class="line">git push origin main</span><br></pre></td></tr></table></figure>
+<h2 id="0x04-自动-push-更新"><a href="#0x04-自动-push-更新" class="headerlink" title="0x04 自动 push 更新"></a>0x04 自动 push 更新</h2><p>配置 chezmoi<br><code>~/.config/chezmoi/chezmoi.toml</code><br>添加：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[git]</span><br><span class="line">    autoCommit = true</span><br><span class="line">    autoPush = true</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="0x05-基本使用（类似-git）"><a href="#0x05-基本使用（类似-git）" class="headerlink" title="0x05 基本使用（类似 git）"></a>0x05 基本使用（类似 git）</h2><h4 id="1-修改本地文件后添加到-chezmoi-存储库"><a href="#1-修改本地文件后添加到-chezmoi-存储库" class="headerlink" title="1. 修改本地文件后添加到 chezmoi 存储库"></a>1. 修改本地文件后添加到 chezmoi 存储库</h4><p><code>chezmoi status</code> 查看 修改状态<br>我这里是修改了 <code>home</code> 目录的文件<br><img src="/Chezmoi_tutorial.assets/6705533d680617a891bcbb0fbbeaada0.png" alt="CleanShot 2025-07-10 at 16.06.20@2x.png"><br>想要将 本地修改应用到 chezmoi 库，只需再 <code>add</code> 下<br><img src="/Chezmoi_tutorial.assets/d1e6fb8f31e07d2f02e24a14b9bd2d5f.png" alt="CleanShot 2025-07-10 at 16.12.11@2x.png"></p>
+<p>这里添加文件报错了，手动在 chezmoi 库目录下<code>.local/share/chezmoi/</code>运行一下提示的命令就可以了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push --set-upstream origin main</span><br></pre></td></tr></table></figure>
+<p><img src="/Chezmoi_tutorial.assets/451c098f176241cef759a70f6e5277bf.png" alt="CleanShot 2025-07-10 at 16.16.53@2x.png"><br>之后就可以正常同步了<br><img src="/Chezmoi_tutorial.assets/8e4783661ab17aaa1198d2cd60bd3353.png" alt="CleanShot 2025-07-10 at 16.18.22@2x.png"></p>
+<h4 id="2-修改存储库文件应用到本地"><a href="#2-修改存储库文件应用到本地" class="headerlink" title="2. 修改存储库文件应用到本地"></a>2. 修改存储库文件应用到本地</h4><p>通过 <code>chezmoi edit</code> 编缉 chezmoi 库的文件，之后通过 <code>chezmoi apply</code> 应用到本地<br><img src="/Chezmoi_tutorial.assets/6be507e18d0ed5d5cb5a1f1cb38a54b1.png" alt="CleanShot 2025-07-10 at 16.23.23@2x.png"></p>
+<p>注意这里的文件名是你本地的文件名。<br><img src="/Chezmoi_tutorial.assets/790ac2a04548029d4d2721a626af8059.png" alt="CleanShot 2025-07-10 at 16.24.36@2x.png"></p>
+<h2 id="0x06-多端同步"><a href="#0x06-多端同步" class="headerlink" title="0x06 多端同步"></a>0x06 多端同步</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">chezmoi init username  <span class="comment"># 如果你的github库名叫dotfiles，不是的话用 url:</span></span><br><span class="line">chezmoi init https://user@github.com/user/dotfiles.git</span><br><span class="line">chezmoi apply -v <span class="comment"># 应用配置</span></span><br></pre></td></tr></table></figure>
+
+<p>更多参考<a target="_blank" rel="noopener" href="https://www.chezmoi.io/reference/commands/init/">官方文档</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">0x00 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-mac"><span class="toc-number">1.1.</span> <span class="toc-text">1. mac</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Debian-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.2.</span> <span class="toc-text">2. Debian 服务器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">0x01 初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E7%AE%A1%E7%90%86dotfiles"><span class="toc-number">3.</span> <span class="toc-text">0x02 管理dotfiles</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E5%90%8C%E6%AD%A5%E5%88%B0-git"><span class="toc-number">4.</span> <span class="toc-text">0x03 同步到 git</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E8%87%AA%E5%8A%A8-push-%E6%9B%B4%E6%96%B0"><span class="toc-number">5.</span> <span class="toc-text">0x04 自动 push 更新</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%EF%BC%88%E7%B1%BB%E4%BC%BC-git%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">0x05 基本使用（类似 git）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BF%AE%E6%94%B9%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%90%8E%E6%B7%BB%E5%8A%A0%E5%88%B0-chezmoi-%E5%AD%98%E5%82%A8%E5%BA%93"><span class="toc-number">6.0.1.</span> <span class="toc-text">1. 修改本地文件后添加到 chezmoi 存储库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BF%AE%E6%94%B9%E5%AD%98%E5%82%A8%E5%BA%93%E6%96%87%E4%BB%B6%E5%BA%94%E7%94%A8%E5%88%B0%E6%9C%AC%E5%9C%B0"><span class="toc-number">6.0.2.</span> <span class="toc-text">2. 修改存储库文件应用到本地</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E5%A4%9A%E7%AB%AF%E5%90%8C%E6%AD%A5"><span class="toc-number">7.</span> <span class="toc-text">0x06 多端同步</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&text=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&is_video=false&description=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Chezmoi 实践：跨平台 dotfile 管理&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&title=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&name=Chezmoi 实践：跨平台 dotfile 管理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/02/Chezmoi_tutorial/&t=Chezmoi 实践：跨平台 dotfile 管理"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2025
+    Ch4m1gn0n
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

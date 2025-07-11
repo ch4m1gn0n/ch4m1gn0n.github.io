@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="参考文章：How to Store Dotfiles - A Bare Git Repository | Atlassian Git Tutorial 将配置同步到git创建一个 bare repository bare repo 详解 1git init --bare ~&#x2F;.cfg  ​​ 配置alias(别名)，指定git目录和工作空间 我这里用的 是 fish shell， 编辑 fish">
+<meta property="og:type" content="article">
+<meta property="og:title" content="github：跨平台 dotfile 管理">
+<meta property="og:url" content="https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/index.html">
+<meta property="og:site_name" content="Ch4m1gn0n&#39;s blog">
+<meta property="og:description" content="参考文章：How to Store Dotfiles - A Bare Git Repository | Atlassian Git Tutorial 将配置同步到git创建一个 bare repository bare repo 详解 1git init --bare ~&#x2F;.cfg  ​​ 配置alias(别名)，指定git目录和工作空间 我这里用的 是 fish shell， 编辑 fish">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/github_dotfile_management.assets/08b3606f203c9bf32b50046f06cf449c.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/github_dotfile_management.assets/37f1902fa15abce34635e92fa9e87c4f.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/github_dotfile_management.assets/54302965ec49e104c72b009c8760acbf.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/github_dotfile_management.assets/a640fdb7f21bba87342741a2b8b36268.png">
+<meta property="article:published_time" content="2025-07-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-07-11T03:03:28.138Z">
+<meta property="article:author" content="Ch4m1gn0n">
+<meta property="article:tag" content="config">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ch4m1gn0n.github.io/github_dotfile_management.assets/08b3606f203c9bf32b50046f06cf449c.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>github：跨平台 dotfile 管理</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/07/02/Chezmoi_tutorial/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/07/01/Simple%20Encryptor/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&text=github：跨平台 dotfile 管理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&is_video=false&description=github：跨平台 dotfile 管理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=github：跨平台 dotfile 管理&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&name=github：跨平台 dotfile 管理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&t=github：跨平台 dotfile 管理"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B0%86%E9%85%8D%E7%BD%AE%E5%90%8C%E6%AD%A5%E5%88%B0git"><span class="toc-number">1.</span> <span class="toc-text">将配置同步到git</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8E-git-%E5%90%8C%E6%AD%A5%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">从 git 同步配置</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        github：跨平台 dotfile 管理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Ch4m1gn0n</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-07-02T00:00:00.000Z" class="dt-published" itemprop="datePublished">2025-07-02</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/config/">config</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/config/" rel="tag">config</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>参考文章：<a target="_blank" rel="noopener" href="https://www.atlassian.com/git/tutorials/dotfiles">How to Store Dotfiles - A Bare Git Repository | Atlassian Git Tutorial</a></p>
+<h1 id="将配置同步到git"><a href="#将配置同步到git" class="headerlink" title="将配置同步到git"></a>将配置同步到git</h1><p>创建一个 bare repository</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1825910">bare repo 详解</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git init --bare ~/.cfg</span><br></pre></td></tr></table></figure>
+
+<p>​​</p>
+<p>配置alias(别名)，指定git目录和工作空间</p>
+<p>我这里用的 是 fish shell， 编辑 fish 配置文件(~&#x2F;.config&#x2F;fish&#x2F;config.fish​)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function config</span><br><span class="line">    /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $argv</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>bash 如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="string">&quot;alias config=&#x27;/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME&#x27;&quot;</span> &gt;&gt; $HOME/.bashrc</span><br></pre></td></tr></table></figure>
+
+<p>配置不显示未追踪的文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config config --local status.showUntrackedFiles no</span><br></pre></td></tr></table></figure>
+
+<p>如果没有配置，则会一直提示 Untracked files;</p>
+<p><img src="/github_dotfile_management.assets/08b3606f203c9bf32b50046f06cf449c.png" alt="08b3606f203c9bf32b50046f06cf449c"></p>
+<p>之后就可以向 repo 中添加配置文件了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">⋊&gt; ~ config add nvim                 </span><br><span class="line">⋊&gt; ~ config commit -m <span class="string">&quot;Add nvim config&quot;</span>                                                                                                                                              04:58:31                                                                                                                                  04:57:56</span><br></pre></td></tr></table></figure>
+
+<p>注意要在父目录下 add 文件夹，</p>
+<p><img src="/github_dotfile_management.assets/37f1902fa15abce34635e92fa9e87c4f.png" alt="37f1902fa15abce34635e92fa9e87c4f"></p>
+<p>不清楚为什么，这么 add 只添加了一个连接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config add ~/.config/nvim </span><br></pre></td></tr></table></figure>
+
+<p>​​</p>
+<p>创建一个新 repo</p>
+<p><img src="/github_dotfile_management.assets/54302965ec49e104c72b009c8760acbf.png" alt="54302965ec49e104c72b009c8760acbf"></p>
+<p>根据提示的命令建立连接</p>
+<p><img src="/github_dotfile_management.assets/a640fdb7f21bba87342741a2b8b36268.png" alt="a640fdb7f21bba87342741a2b8b36268"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">⋊&gt; ~ config remote add origin https:<span class="comment">//github.com/ch4m1gn0n/dotfiles.git                                                                                                              04:56:43</span></span><br><span class="line">⋊&gt; ~ config branch -M main                                                                                                                                                           <span class="number">04</span>:<span class="number">57</span>:<span class="number">04</span></span><br><span class="line">⋊&gt; ~ config push -u origin main</span><br></pre></td></tr></table></figure>
+
+<h1 id="从-git-同步配置"><a href="#从-git-同步配置" class="headerlink" title="从 git 同步配置"></a>从 git 同步配置</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;.cfg&quot;</span> &gt;&gt; .gitignore</span><br></pre></td></tr></table></figure>
+
+<p>​.gitignore​ 文件是一个 Git 仓库中的配置文件，用于指定哪些文件或目录应该被 Git 忽略，不纳入版本控制中。当您将文件添加到 .gitignore​ 中时，Git 将忽略这些文件的更改和提交。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> --bare &lt;git-repo-url&gt; <span class="variable">$HOME</span>/.cfg</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/git --git-dir=<span class="variable">$HOME</span>/.cfg/ --work-tree=<span class="variable">$HOME</span> checkout</span><br></pre></td></tr></table></figure>
+
+<p>可能遇到的问题</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">error: The following untracked working tree files would be overwritten by checkout:</span><br><span class="line">    .bashrc</span><br><span class="line">    .gitignore</span><br><span class="line">Please move or remove them before you can switch branches.</span><br><span class="line">Aborting</span><br></pre></td></tr></table></figure>
+
+<p>因为已经有些配置文件存在了，提示将会被覆盖，备份删除上面提示的文件就可以了</p>
+<p>shell 脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">git <span class="built_in">clone</span> --bare https://bitbucket.org/durdn/cfg.git <span class="variable">$HOME</span>/.cfg</span><br><span class="line"><span class="keyword">function</span> config &#123;</span><br><span class="line">   /usr/bin/git --git-dir=<span class="variable">$HOME</span>/.cfg/ --work-tree=<span class="variable">$HOME</span> <span class="variable">$@</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">mkdir</span> -p .config-backup</span><br><span class="line">config checkout</span><br><span class="line"><span class="keyword">if</span> [ $? = 0 ]; <span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;Checked out config.&quot;</span>;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Backing up pre-existing dot files.&quot;</span>;</span><br><span class="line">    config checkout 2&gt;&amp;1 | egrep <span class="string">&quot;\s+\.&quot;</span> | awk &#123;<span class="string">&#x27;print $1&#x27;</span>&#125; | xargs -I&#123;&#125; <span class="built_in">mv</span> &#123;&#125; .config-backup/&#123;&#125;</span><br><span class="line"><span class="keyword">fi</span>;</span><br><span class="line">config checkout</span><br><span class="line">config config status.showUntrackedFiles no</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B0%86%E9%85%8D%E7%BD%AE%E5%90%8C%E6%AD%A5%E5%88%B0git"><span class="toc-number">1.</span> <span class="toc-text">将配置同步到git</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8E-git-%E5%90%8C%E6%AD%A5%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">从 git 同步配置</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&text=github：跨平台 dotfile 管理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&is_video=false&description=github：跨平台 dotfile 管理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=github：跨平台 dotfile 管理&body=Check out this article: https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&title=github：跨平台 dotfile 管理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&name=github：跨平台 dotfile 管理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2025/07/02/github_dotfile_management/&t=github：跨平台 dotfile 管理"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2025
+    Ch4m1gn0n
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
