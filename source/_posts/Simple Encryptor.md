@@ -7,11 +7,9 @@ tags:
 - HACKTHEBOX
 - Reverse_Engineering
 ---
-
-
-### 加密分析
+## 0x00 加密分析
 拖入binary ninja
-![](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9cf0c5ff4b6448ec9ba9745402c209aa.png)
+![](Simple%20Encryptor.assets/9cf0c5ff4b6448ec9ba9745402c209aa.png)
 内容
 ```c
 00001295      void* fsbase
@@ -54,7 +52,7 @@ tags:
 
 > rol.b 按位循环左移 ，.b 表示操作一个字节
 
-### 解密
+## 0x01 解密
 解密思路
 获取时间戳设置种子 -> 循环每位（生成随机数a、b=b&7 -> 循环右移 b 位 -> 异或a）-> flag
 **代码：**
