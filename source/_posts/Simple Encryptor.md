@@ -80,7 +80,7 @@ fn decrypt_byte(x:&u8) -> u8 {
 fn main() {
 
     // 打开文件
-    let mut file = File::open("/root/htb/Reverse Engeneering/rev_simpleencryptor/flag.enc").unwrap();
+    let mut file = File::open("./flag.enc").unwrap();
     // 获取文件大小
     let file_size = file.metadata().unwrap().len() as usize;
     // println!("{}",file_size);
