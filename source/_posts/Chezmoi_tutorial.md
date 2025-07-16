@@ -23,13 +23,13 @@ chezmoi --version
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)"
 ```
-![CleanShot 2025-07-04 at 17.13.55@2x.png](Chezmoi_tutorial.assets/9288ad29ee15437326e6bef380fdc4e2.png)
+![CleanShot 2025-07-04 at 17.13.55@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9288ad29ee15437326e6bef380fdc4e2.png)
 ## 0x01 初始化
 ```bash
 chezmoi init
 ```
 会创建这个文件夹`.local/share/chezmoi/`
-![CleanShot 2025-07-04 at 17.22.05@2x.png](Chezmoi_tutorial.assets/d3137c4c447193b88036663573399b49.png)
+![CleanShot 2025-07-04 at 17.22.05@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/d3137c4c447193b88036663573399b49.png)
 ## 0x02 管理dotfiles
 
 ```bash
@@ -38,9 +38,9 @@ chezmoi add ~/.hyper.js
 #...
 ```
 添加之后会将文件备份到 `.local/share/chezmoi/`
-![CleanShot 2025-07-07 at 17.46.19@2x.png](Chezmoi_tutorial.assets/0a49e445f5c9c1cfb8ff67704b0f991c.png)
+![CleanShot 2025-07-07 at 17.46.19@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/0a49e445f5c9c1cfb8ff67704b0f991c.png)
 `chezmoi managed` 可以列出所有添加的文件
-![CleanShot 2025-07-07 at 17.47.41@2x.png](Chezmoi_tutorial.assets/57af769d292f109576c7588c09c44447.png)
+![CleanShot 2025-07-07 at 17.47.41@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/57af769d292f109576c7588c09c44447.png)
 
 ## 0x03 同步到 git
 ```
@@ -70,23 +70,23 @@ git push origin main
 #### 1. 修改本地文件后添加到 chezmoi 存储库
 `chezmoi status` 查看 修改状态
 我这里是修改了 `home` 目录的文件
-![CleanShot 2025-07-10 at 16.06.20@2x.png](Chezmoi_tutorial.assets/6705533d680617a891bcbb0fbbeaada0.png)
+![CleanShot 2025-07-10 at 16.06.20@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/6705533d680617a891bcbb0fbbeaada0.png)
 想要将 本地修改应用到 chezmoi 库，只需再 `add` 下
-![CleanShot 2025-07-10 at 16.12.11@2x.png](Chezmoi_tutorial.assets/d1e6fb8f31e07d2f02e24a14b9bd2d5f.png)
+![CleanShot 2025-07-10 at 16.12.11@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/d1e6fb8f31e07d2f02e24a14b9bd2d5f.png)
 
 这里添加文件报错了，手动在 chezmoi 库目录下`.local/share/chezmoi/`运行一下提示的命令就可以了
 ```
 git push --set-upstream origin main
 ```
-![CleanShot 2025-07-10 at 16.16.53@2x.png](Chezmoi_tutorial.assets/451c098f176241cef759a70f6e5277bf.png)
+![CleanShot 2025-07-10 at 16.16.53@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/451c098f176241cef759a70f6e5277bf.png)
 之后就可以正常同步了
-![CleanShot 2025-07-10 at 16.18.22@2x.png](Chezmoi_tutorial.assets/8e4783661ab17aaa1198d2cd60bd3353.png)
+![CleanShot 2025-07-10 at 16.18.22@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/8e4783661ab17aaa1198d2cd60bd3353.png)
 #### 2. 修改存储库文件应用到本地
 通过 `chezmoi edit` 编缉 chezmoi 库的文件，之后通过 `chezmoi apply` 应用到本地
-![CleanShot 2025-07-10 at 16.23.23@2x.png](Chezmoi_tutorial.assets/6be507e18d0ed5d5cb5a1f1cb38a54b1.png)
+![CleanShot 2025-07-10 at 16.23.23@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/6be507e18d0ed5d5cb5a1f1cb38a54b1.png)
 
 注意这里的文件名是你本地的文件名。
-![CleanShot 2025-07-10 at 16.24.36@2x.png](Chezmoi_tutorial.assets/790ac2a04548029d4d2721a626af8059.png)
+![CleanShot 2025-07-10 at 16.24.36@2x.png](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/790ac2a04548029d4d2721a626af8059.png)
 
 ## 0x06 多端同步
 ```bash

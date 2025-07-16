@@ -44,7 +44,7 @@ config config --local status.showUntrackedFiles no
 
 如果没有配置，则会一直提示 Untracked files;
 
-![08b3606f203c9bf32b50046f06cf449c](github_dotfile_management.assets/08b3606f203c9bf32b50046f06cf449c.png)
+![08b3606f203c9bf32b50046f06cf449c](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/08b3606f203c9bf32b50046f06cf449c.png)
 
 之后就可以向 repo 中添加配置文件了
 
@@ -55,7 +55,7 @@ config config --local status.showUntrackedFiles no
 
 注意要在父目录下 add 文件夹，
 
-![37f1902fa15abce34635e92fa9e87c4f](github_dotfile_management.assets/37f1902fa15abce34635e92fa9e87c4f.png)
+![37f1902fa15abce34635e92fa9e87c4f](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/37f1902fa15abce34635e92fa9e87c4f.png)
 
 不清楚为什么，这么 add 只添加了一个连接
 
@@ -67,11 +67,11 @@ config add ~/.config/nvim
 
 创建一个新 repo
 
-![54302965ec49e104c72b009c8760acbf](github_dotfile_management.assets/54302965ec49e104c72b009c8760acbf.png)
+![54302965ec49e104c72b009c8760acbf](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/54302965ec49e104c72b009c8760acbf.png)
 
 根据提示的命令建立连接
 
-![a640fdb7f21bba87342741a2b8b36268](github_dotfile_management.assets/a640fdb7f21bba87342741a2b8b36268.png)
+![a640fdb7f21bba87342741a2b8b36268](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/a640fdb7f21bba87342741a2b8b36268.png)
 
 ```c
 ⋊> ~ config remote add origin https://github.com/ch4m1gn0n/dotfiles.git                                                                                                              04:56:43
