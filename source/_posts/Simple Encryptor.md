@@ -9,7 +9,7 @@ tags:
 ---
 ## 0x00 加密分析
 拖入binary ninja
-![](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/9cf0c5ff4b6448ec9ba9745402c209aa.png)
+![binary ninja decompile](binary-ninja-decompile.png)
 内容
 ```c
 00001295      void* fsbase

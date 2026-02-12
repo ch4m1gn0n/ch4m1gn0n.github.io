@@ -1,7 +1,7 @@
 ---
 title: github：跨平台 dotfile 管理
 date: 2025-07-02
-categories: 
+categories:
 - config
 tags:
 - config
@@ -14,17 +14,15 @@ tags:
 
 [bare repo 详解](https://cloud.tencent.com/developer/article/1825910)
 
-```c
+```bash
 git init --bare ~/.cfg
 ```
-
-​​
 
 配置alias(别名)，指定git目录和工作空间
 
 我这里用的 是 fish shell， 编辑 fish 配置文件(~/.config/fish/config.fish​)
 
-```c
+```bash
 function config
     /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $argv
 end
@@ -32,63 +30,53 @@ end
 
 bash 如下
 
-```c
+```bash
 echo "alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'" >> $HOME/.bashrc
 ```
 
 配置不显示未追踪的文件
 
-```c
+```bash
 config config --local status.showUntrackedFiles no
 ```
 
-如果没有配置，则会一直提示 Untracked files;
-
-![08b3606f203c9bf32b50046f06cf449c](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/08b3606f203c9bf32b50046f06cf449c.png)
+如果没有配置，`config status` 会一直提示大量 Untracked files：
+```
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .cache/
+        .local/
+        ...
+```
 
 之后就可以向 repo 中添加配置文件了
 
 ```bash
-⋊> ~ config add nvim                 
-⋊> ~ config commit -m "Add nvim config"                                                                                                                                              04:58:31                                                                                                                                  04:57:56
+config add nvim
+config commit -m "Add nvim config"
 ```
 
-注意要在父目录下 add 文件夹，
+注意要在父目录下 add 文件夹，不要使用绝对路径 `config add ~/.config/nvim`，否则可能只会添加一个链接而非完整目录。
 
-![37f1902fa15abce34635e92fa9e87c4f](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/37f1902fa15abce34635e92fa9e87c4f.png)
-
-不清楚为什么，这么 add 只添加了一个连接
+创建一个新 GitHub repo（命名为 `dotfiles` 或其他），然后根据提示建立连接：
 
 ```bash
-config add ~/.config/nvim 
-```
-
-​​
-
-创建一个新 repo
-
-![54302965ec49e104c72b009c8760acbf](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/54302965ec49e104c72b009c8760acbf.png)
-
-根据提示的命令建立连接
-
-![a640fdb7f21bba87342741a2b8b36268](https://attachment.tos-s3-cn-beijing.volces.com/2025/07/a640fdb7f21bba87342741a2b8b36268.png)
-
-```c
-⋊> ~ config remote add origin https://github.com/ch4m1gn0n/dotfiles.git                                                                                                              04:56:43
-⋊> ~ config branch -M main                                                                                                                                                           04:57:04
-⋊> ~ config push -u origin main
+config remote add origin https://github.com/ch4m1gn0n/dotfiles.git
+config branch -M main
+config push -u origin main
 ```
 
 # 从 git 同步配置
 
 ```bash
-echo ".cfg" >> .gitignore
+echo ".cfg" >> .gitignore
 ```
 
 ​.gitignore​ 文件是一个 Git 仓库中的配置文件，用于指定哪些文件或目录应该被 Git 忽略，不纳入版本控制中。当您将文件添加到 .gitignore​ 中时，Git 将忽略这些文件的更改和提交。
 
 ```bash
-git clone --bare <git-repo-url> $HOME/.cfg
+git clone --bare <git-repo-url> $HOME/.cfg
 ```
 
 ```bash
