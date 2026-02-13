@@ -217,7 +217,7 @@ SSH 到 WSL 时，右上角显示 Badge：
 
 > Badge 颜色在 iTerm2 中配置：Settings → Profiles → 选择 Profile → Colors → Badge
 
-不过，现在我通过chezmoi 配置了不同的starship主题，不过badge看起来很清晰，也保留了下来。
+现在通过chezmoi 配置了不同环境下采用不同的starship主题，可以区分了，不过badge看起来很清晰，也保留了下来。
 
 #### 1. fish 函数
 
@@ -277,7 +277,7 @@ end
 
 #### 2. Starship 主题区分
 
-除了 Badge，还通过 chezmoi 模板为不同系统配置了不同的 Starship 提示符，SSH 到 WSL 时强制显示用户名和主机名：
+ chezmoi 上对 Starship 的模板配置，WSL shell 强制显示用户名和主机名：
 
 ```toml
 [hostname]
