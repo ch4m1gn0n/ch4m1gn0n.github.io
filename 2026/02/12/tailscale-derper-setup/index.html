@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="参考文章：我的服务器系列：tailscale使用自定义derper服务器（docker部署） - 且炼时光自建 DERP 中继服务器，从此 Tailscale 畅通无阻-腾讯云开发者社区-腾讯云 总体设计服务器版本  Linux iv-ydkbpuraiocva4f6n5n5 6.1.0-18-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.76-1 (2024-0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="配置 tailscale 中继服务器 derper（已备案域名）">
+<meta property="og:url" content="https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/index.html">
+<meta property="og:site_name" content="Ch4m1gn0n&#39;s blog">
+<meta property="og:description" content="参考文章：我的服务器系列：tailscale使用自定义derper服务器（docker部署） - 且炼时光自建 DERP 中继服务器，从此 Tailscale 畅通无阻-腾讯云开发者社区-腾讯云 总体设计服务器版本  Linux iv-ydkbpuraiocva4f6n5n5 6.1.0-18-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.76-1 (2024-0">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/file-20260212174511238.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/file-20260212174511240.png">
+<meta property="og:image" content="https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/file-20260212174511242.png">
+<meta property="article:published_time" content="2026-02-12T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-13T04:51:47.773Z">
+<meta property="article:author" content="Ch4m1gn0n">
+<meta property="article:tag" content="config">
+<meta property="article:tag" content="tailscale">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/file-20260212174511238.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>配置 tailscale 中继服务器 derper（已备案域名）</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2026/02/13/remote-wsl-dev-setup/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/07/02/chezmoi-tutorial/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&text=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&is_video=false&description=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=配置 tailscale 中继服务器 derper（已备案域名）&body=Check out this article: https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&name=配置 tailscale 中继服务器 derper（已备案域名）&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&t=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E4%BD%93%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AE-nginx"><span class="toc-number">2.</span> <span class="toc-text">0x00 安装并配置 nginx</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85-nginx"><span class="toc-number">2.0.0.1.</span> <span class="toc-text">1. 安装 nginx</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E9%85%8D%E7%BD%AE-stream"><span class="toc-number">2.0.0.2.</span> <span class="toc-text">2. 配置 stream</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E4%BF%AE%E6%94%B9-nginx-%E7%BD%91%E7%AB%99%E9%85%8D%E7%BD%AE"><span class="toc-number">2.0.0.3.</span> <span class="toc-text">3. 修改 nginx  网站配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-%E4%B8%BA-%E7%94%A8%E4%BA%8E-11111-%E7%AB%AF%E5%8F%A3%E7%9A%84%E5%9F%9F%E5%90%8D%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="toc-number">2.0.0.3.1.</span> <span class="toc-text">3.1 为 用于 11111 端口的域名生成证书</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-%E7%BD%91%E7%AB%99%E9%85%8D%E7%BD%AE%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">2.0.0.3.2.</span> <span class="toc-text">3.2 网站配置如下：</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%AE%89%E8%A3%85-tailscale"><span class="toc-number">3.</span> <span class="toc-text">0x01 安装 tailscale</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%AE%89%E8%A3%85derper"><span class="toc-number">4.</span> <span class="toc-text">0x02 安装derper</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%90%AF%E5%8A%A8-docker"><span class="toc-number">4.0.0.1.</span> <span class="toc-text">1. 启动 docker</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E6%B7%BB%E5%8A%A0-derper-%E5%88%B0-tailscale"><span class="toc-number">5.</span> <span class="toc-text">0x03 添加 derper 到 tailscale</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E5%90%AF%E5%8A%A8%E5%AD%90%E8%B7%AF%E7%94%B1"><span class="toc-number">6.</span> <span class="toc-text">0x04 启动子路由</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        配置 tailscale 中继服务器 derper（已备案域名）
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Ch4m1gn0n</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-02-12T00:00:00.000Z" class="dt-published" itemprop="datePublished">2026-02-12</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/config/">config</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/config/" rel="tag">config</a>, <a class="p-category" href="/tags/tailscale/" rel="tag">tailscale</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>参考文章：<br><a target="_blank" rel="noopener" href="https://always200.com/tailscale-derper-docker#%E5%9B%9B-tailscale%E9%85%8D%E7%BD%AE">我的服务器系列：tailscale使用自定义derper服务器（docker部署） - 且炼时光</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1977129">自建 DERP 中继服务器，从此 Tailscale 畅通无阻-腾讯云开发者社区-腾讯云</a></p>
+<h1 id="总体设计"><a href="#总体设计" class="headerlink" title="总体设计"></a>总体设计</h1><p>服务器版本</p>
+<blockquote>
+<p>Linux iv-ydkbpuraiocva4f6n5n5 6.1.0-18-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.76-1 (2024-02-01) x86_64 GNU&#x2F;Linux</p>
+</blockquote>
+<p>目前存在两个 http 服务，syncthing 用于文件同步，derper 用于 隧道搭建。设计如下：<br><strong>syncthing服务</strong>，放在 <code>11111</code> 端口，<br><strong>derper</strong> 需要启动一个 <code>http</code> 服务，放在 <code>3443</code> 端口，<br>通过 nginx stream 模块进行流量转发，共用 <code>443</code> 端口。<br>整体思路如下：<br><strong>一、nginx 网站配置文件中配置两个 web 服务：</strong></p>
+<ol>
+<li><code>80</code> 端口重定向到 <code>443</code></li>
+<li><code>12443</code> 端口 代理后端 <code>11111</code> 端口 <code>http</code> 服务，并为其配置 <code>https</code></li>
+</ol>
+<p> <strong>二、nginx 服务配置启动 stream 模块</strong><br>配置 stream 模块通过 SNI 识别，将不同域名映射到不同端口</p>
+<h1 id="0x00-安装并配置-nginx"><a href="#0x00-安装并配置-nginx" class="headerlink" title="0x00 安装并配置 nginx"></a>0x00 安装并配置 nginx</h1><h4 id="1-安装-nginx"><a href="#1-安装-nginx" class="headerlink" title="1. 安装 nginx"></a>1. 安装 nginx</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install nginx</span><br></pre></td></tr></table></figure>
+<h4 id="2-配置-stream"><a href="#2-配置-stream" class="headerlink" title="2. 配置 stream"></a>2. 配置 stream</h4><p>将下面内容加入 <code>/etc/nginx/nginx.conf</code></p>
+<blockquote>
+<p>配置 Nginx  <strong><code>stream</code> 模块</strong>中的一个服务器块，用来处理 <strong>TCP 流量</strong>（例如 HTTPS 请求）并通过 <strong>SNI（Server Name Indication）</strong> 将流量转发到不同的后端服务器。</p>
+</blockquote>
+<p>首次配置后执行 <code>nginx -t</code> 报错，缺少 stream 模块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx: [emerg] unknown directive &quot;stream&quot; in /etc/nginx/nginx.conf:12</span><br><span class="line">nginx: configuration file /etc/nginx/nginx.conf test failed</span><br></pre></td></tr></table></figure>
+<p>安装该模块：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install -y libnginx-mod-stream</span><br></pre></td></tr></table></figure>
+<p>安装后再次测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</span><br><span class="line">nginx: configuration file /etc/nginx/nginx.conf test is successful</span><br></pre></td></tr></table></figure>
+
+<p>nginx.conf 配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">user www-data;</span><br><span class="line">worker_processes auto;</span><br><span class="line">pid /run/nginx.pid;</span><br><span class="line">error_log /var/log/nginx/error.log;</span><br><span class="line">include /etc/nginx/modules-enabled/*.conf;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">        worker_connections 768;</span><br><span class="line">        # multi_accept on;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">stream &#123;</span><br><span class="line">    # 这里就是 SNI 识别，将域名映射成一个配置名</span><br><span class="line">    map $ssl_preread_server_name $backend_name &#123;</span><br><span class="line">    # 把 derp.ch4m1gn0n.site 的流量转到 derper 的 upstream</span><br><span class="line">        derp.ch4m1gn0n.site derper;</span><br><span class="line">    # 域名都不匹配情况下的默认值</span><br><span class="line">        default sync;</span><br><span class="line">    &#125;</span><br><span class="line">    # 监听 443 并开启 ssl_preread</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 443 reuseport;</span><br><span class="line">        listen [::]:443 reuseport;</span><br><span class="line">        proxy_pass  $backend_name;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;</span><br><span class="line">    upstream derper &#123;</span><br><span class="line">      server 127.0.0.1:3443;</span><br><span class="line">    &#125;</span><br><span class="line">    upstream sync &#123;</span><br><span class="line">      server 127.0.0.1:12443;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line"></span><br><span class="line">        ##</span><br><span class="line">        # Basic Settings</span><br><span class="line">        ##</span><br><span class="line"></span><br><span class="line">        sendfile on;</span><br><span class="line">        tcp_nopush on;</span><br><span class="line">        types_hash_max_size 2048;</span><br><span class="line">        # server_tokens off;</span><br><span class="line"></span><br><span class="line">        # server_names_hash_bucket_size 64;</span><br><span class="line">        # server_name_in_redirect off;</span><br><span class="line"></span><br><span class="line">        include /etc/nginx/mime.types;</span><br><span class="line">        default_type application/octet-stream;</span><br><span class="line"></span><br><span class="line">        ##</span><br><span class="line">        # SSL Settings</span><br><span class="line">        ##</span><br><span class="line"></span><br><span class="line">        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE</span><br><span class="line">        ssl_prefer_server_ciphers on;</span><br><span class="line"></span><br><span class="line">        ##</span><br><span class="line">        # Logging Settings</span><br><span class="line">        ##</span><br><span class="line"></span><br><span class="line">        access_log /var/log/nginx/access.log;</span><br><span class="line"></span><br><span class="line">        ##</span><br><span class="line">        # Gzip Settings</span><br><span class="line">        ##</span><br><span class="line"></span><br><span class="line">        gzip on;</span><br><span class="line"></span><br><span class="line">        # gzip_vary on;</span><br><span class="line">        # gzip_proxied any;</span><br><span class="line">        # gzip_comp_level 6;</span><br><span class="line">        # gzip_buffers 16 8k;</span><br><span class="line">        # gzip_http_version 1.1;</span><br><span class="line">        # gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;</span><br><span class="line"></span><br><span class="line">        ##</span><br><span class="line">        # Virtual Host Configs</span><br><span class="line">        ##</span><br><span class="line"></span><br><span class="line">        include /etc/nginx/conf.d/*.conf;</span><br><span class="line">        include /etc/nginx/sites-enabled/*;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="3-修改-nginx-网站配置"><a href="#3-修改-nginx-网站配置" class="headerlink" title="3. 修改 nginx  网站配置"></a>3. 修改 nginx  网站配置</h4><p>两部分内容</p>
+<ol>
+<li>80 端口重定向到 443</li>
+<li>12443 端口 代理后端 11111 端口 http 服务，并配置 https</li>
+</ol>
+<h5 id="3-1-为-用于-11111-端口的域名生成证书"><a href="#3-1-为-用于-11111-端口的域名生成证书" class="headerlink" title="3.1 为 用于 11111 端口的域名生成证书"></a>3.1 为 用于 11111 端口的域名生成证书</h5><p>生成sync 域名证书</p>
+<blockquote>
+<p>derper 证书，docker 内部会自动用 letsencrypt 申请</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">certbot certonly --standalone -d sync.ch4m1gn0n.site</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-2-网站配置如下："><a href="#3-2-网站配置如下：" class="headerlink" title="3.2 网站配置如下："></a>3.2 网站配置如下：</h5><p>debian 位于 <code>/etc/nginx/sites-enabled/default</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 80 default_server;</span><br><span class="line">        listen [::]:80 default_server;</span><br><span class="line"></span><br><span class="line">        server_name _;</span><br><span class="line"></span><br><span class="line">        return 301 https://$host$request_uri;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">        listen 12443 ssl http2;</span><br><span class="line">        listen [::]:12443 ssl http2;</span><br><span class="line"></span><br><span class="line">        server_name sync.ch4m1gn0n.site;</span><br><span class="line"></span><br><span class="line">        # 配置 SSL 证书</span><br><span class="line">        ssl_certificate /etc/letsencrypt/live/sync.ch4m1gn0n.site/fullchain.pem;</span><br><span class="line">        ssl_certificate_key /etc/letsencrypt/live/sync.ch4m1gn0n.site/privkey.pem;</span><br><span class="line"></span><br><span class="line">        # 推荐的 SSL 配置</span><br><span class="line">        ssl_protocols TLSv1.2 TLSv1.3;</span><br><span class="line">        ssl_ciphers HIGH:!aNULL:!MD5;</span><br><span class="line"></span><br><span class="line">        # 转发到后端服务</span><br><span class="line">        location / &#123;</span><br><span class="line">            proxy_pass http://127.0.0.1:11111; # 后端服务的 HTTP 端口</span><br><span class="line">            proxy_set_header Host $host;</span><br><span class="line">            proxy_set_header X-Forwarded-Proto $scheme;</span><br><span class="line">            proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到此，nginx 就配置完成了</p>
+<h1 id="0x01-安装-tailscale"><a href="#0x01-安装-tailscale" class="headerlink" title="0x01 安装 tailscale"></a>0x01 安装 tailscale</h1><p>安装过程请参考<a target="_blank" rel="noopener" href="https://tailscale.com/kb/1174/install-debian-bookworm">官方文档</a></p>
+<h1 id="0x02-安装derper"><a href="#0x02-安装derper" class="headerlink" title="0x02 安装derper"></a>0x02 安装derper</h1><h4 id="1-启动-docker"><a href="#1-启动-docker" class="headerlink" title="1. 启动 docker"></a>1. 启动 docker</h4><p>指定 <code>DERP_VERIFY_CLIENTS=true</code> 防白嫖</p>
+<p>使用 <code>DERP_VERIFY_CLIENTS</code> 则需要挂载 <code>tailscaled.sock</code>，使容器能访问到外部机器 tailscale 进程。<br><code>/var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock</code></p>
+<p>指定 <code>DERP_DOMAIN</code> 之后，容器会自动申请并续期证书。</p>
+<p>最终启动命令，其中 3443 是 web 服务端口，3478 是隧道通信端口。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3443:443 -p 3478:3478/udp --name derper --restart=always -v /data/derper/certs:/app/certs -v /var/run/tailscale/:/var/run/tailscale/ -e DERP_ADDR=<span class="string">&quot;:443&quot;</span> -e DERP_VERIFY_CLIENTS=<span class="literal">true</span> -e DERP_DOMAIN=<span class="string">&quot;derp.ch4m1gn0n.site&quot;</span> fredliang/derper</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x03-添加-derper-到-tailscale"><a href="#0x03-添加-derper-到-tailscale" class="headerlink" title="0x03 添加 derper 到 tailscale"></a>0x03 添加 derper 到 tailscale</h1><p>在 tailscale 官网 Admin Console 修改 access control 配置<br><img src="/2026/02/12/tailscale-derper-setup/file-20260212174511238.png"><br>添加如下内容：</p>
+<blockquote>
+<p>字段内容参考<a target="_blank" rel="noopener" href="https://tailscale.com/kb/1118/custom-derp-servers#add-the-custom-derp-servers-to-your-tailnet">官方文档</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&quot;derpMap&quot;: &#123;</span><br><span class="line">	&quot;OmitDefaultRegions&quot;: true, // true 是 关闭默认 regions</span><br><span class="line">	&quot;Regions&quot;: &#123;</span><br><span class="line">		&quot;900&quot;: &#123;</span><br><span class="line">			&quot;RegionID&quot;:   900,</span><br><span class="line">			&quot;RegionCode&quot;: &quot;huo&quot;,</span><br><span class="line">			&quot;RegionName&quot;: &quot;Huo&quot;,</span><br><span class="line">			&quot;Nodes&quot;: [&#123;</span><br><span class="line">				&quot;Name&quot;:     &quot;huo&quot;,</span><br><span class="line">				&quot;RegionID&quot;: 900,</span><br><span class="line">				&quot;HostName&quot;: &quot;derp.ch4m1gn0n.site&quot;,</span><br><span class="line">				&quot;DERPPort&quot;: 443,</span><br><span class="line">			&#125;],</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>测试 <code>tailscale netcheck</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Report:</span><br><span class="line">    * Time:                          2025-04-02T13:40:17.2468582Z</span><br><span class="line">    * UDP:                           false</span><br><span class="line">    * IPv4:                          (no addr found)</span><br><span class="line">    * IPv6:                          no, but OS has support</span><br><span class="line">    * MappingVariesByDestIP:</span><br><span class="line">    * PortMapping:</span><br><span class="line">    * CaptivePortal:                 false</span><br><span class="line">    * Nearest DERP:                  Huo</span><br><span class="line">    * DERP latency:</span><br><span class="line">        - huo: 26.5ms  (Huo)</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="0x04-启动子路由"><a href="#0x04-启动子路由" class="headerlink" title="0x04 启动子路由"></a>0x04 启动子路由</h1><p>在路由器中打开子路由功能</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tailscale up --advertise-routes=192.168.66.0/24</span><br></pre></td></tr></table></figure>
+
+<p>在 Admin Console 中找到对应机器，点击 <code>Edit route settings</code>：<br><img src="/2026/02/12/tailscale-derper-setup/file-20260212174511240.png"><br>勾选子网路由并保存：<br><img src="/2026/02/12/tailscale-derper-setup/file-20260212174511242.png"><br>启动后，即可在同 tailscale 网络内访问内网 66 网段</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E4%BD%93%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00-%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AE-nginx"><span class="toc-number">2.</span> <span class="toc-text">0x00 安装并配置 nginx</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85-nginx"><span class="toc-number">2.0.0.1.</span> <span class="toc-text">1. 安装 nginx</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E9%85%8D%E7%BD%AE-stream"><span class="toc-number">2.0.0.2.</span> <span class="toc-text">2. 配置 stream</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E4%BF%AE%E6%94%B9-nginx-%E7%BD%91%E7%AB%99%E9%85%8D%E7%BD%AE"><span class="toc-number">2.0.0.3.</span> <span class="toc-text">3. 修改 nginx  网站配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-%E4%B8%BA-%E7%94%A8%E4%BA%8E-11111-%E7%AB%AF%E5%8F%A3%E7%9A%84%E5%9F%9F%E5%90%8D%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="toc-number">2.0.0.3.1.</span> <span class="toc-text">3.1 为 用于 11111 端口的域名生成证书</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-%E7%BD%91%E7%AB%99%E9%85%8D%E7%BD%AE%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">2.0.0.3.2.</span> <span class="toc-text">3.2 网站配置如下：</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%AE%89%E8%A3%85-tailscale"><span class="toc-number">3.</span> <span class="toc-text">0x01 安装 tailscale</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%AE%89%E8%A3%85derper"><span class="toc-number">4.</span> <span class="toc-text">0x02 安装derper</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%90%AF%E5%8A%A8-docker"><span class="toc-number">4.0.0.1.</span> <span class="toc-text">1. 启动 docker</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E6%B7%BB%E5%8A%A0-derper-%E5%88%B0-tailscale"><span class="toc-number">5.</span> <span class="toc-text">0x03 添加 derper 到 tailscale</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E5%90%AF%E5%8A%A8%E5%AD%90%E8%B7%AF%E7%94%B1"><span class="toc-number">6.</span> <span class="toc-text">0x04 启动子路由</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&text=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&is_video=false&description=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=配置 tailscale 中继服务器 derper（已备案域名）&body=Check out this article: https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&title=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&name=配置 tailscale 中继服务器 derper（已备案域名）&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ch4m1gn0n.github.io/2026/02/12/tailscale-derper-setup/&t=配置 tailscale 中继服务器 derper（已备案域名）"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Ch4m1gn0n
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/ch4m1gn0n">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
